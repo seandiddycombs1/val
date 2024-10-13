@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Self Learning HTML</title>
+    <style>
+      .audio-controls {
+        margin-top: 10px;
+      }
+      .volume-control, .seek-control {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .volume-control label, .seek-control label {
+        margin-right: 10px;
+      }
+      #debug {
+        margin-top: 20px;
+        color: red;
+      }
+      .progress-container {
+        width: 300px;
+        height: 20px;
+        background-color: #f0f0f0;
+        margin-top: 10px;
+        position: relative;
+        cursor: pointer;
+      }
+      #progressBar {
+        width: 0;
+        height: 100%;
+        background-color: #4CAF50;
+        position: absolute;
+        transition: width 0.1s;
+      }
+      #progressTime {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        line-height: 20px;
+      }
+      #seekSlider {
+        width: 300px;
+      }
+      .video-container {
+        margin-top: 20px;
+        display: none;
+      }
+      #youtubeVideo, #mp4Video {
+        max-width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>To learn HTML we need to remember below tags</h1>
+    <ol>
+      <li>html</li>
+      <li>body</li>
+    </ol>
+    <p>
+      <a href="https://www.google.com">Visit Google Website</a>
+    </p>
+    
+    <h2>Audio Player</h2>
+    <audio id="myAudio">
+      <source src="spotifydown.com - Lucky Girl Syndrome.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    <div class="audio-controls">
+      <button onclick="playAudio()">Play Audio</button>
+      <button onclick="pauseAudio()">Pause Audio</button>
+      <button onclick="stopAudio()">Stop Audio</button>
+    </div>
+    <div class="volume-control">
+      <label for="volumeControl">Volume:</label>
+      <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="1" oninput="adjustVolume()">
+    </div>
+    <div class="progress-container" id="progressContainer">
+      <div id="progressBar"></div>
+      <div id="progressTime">0:00 / 0:00</div>
+    </div>
+    <div class="seek-control">
+      <label for="seekSlider">Seek:</label>
+      <input type="range" id="seekSlider" min="0" max="100" value="0" step="0.1">
+    </div>
+    <img src="miyeon.jpg" alt="miyeon" width="600" height="auto">
+    <div id="debug"></div>
+    
+    <h2>Video Players</h2>
+    <button onclick="showYouTubeVideo1()">Play YouTube Video 1</button>
+    <button onclick="showYouTubeVideo2()">Play YouTube Video 2</button>
+
+    <div id="youtubeContainer1" class="video-container">
+      <iframe id="youtubeVideo1" class="youtube-video" width="560" height="315" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+    
+    <div id="youtubeContainer2" class="video-container">
+      <iframe id="youtubeVideo2" class="youtube-video" width="560" height="315" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+    
+    <div id="mp4Container" class="video-container">
+      <video id="mp4Video" width="560" height="315" controls>
+        <source src="Snapinsta.app_video_An_ytiHcVJ6Isfih8t9IelfGNrbtmukUxJPY1X_lINDn-RThad-1wmyNPaeutfwtjXZ4hr3lI8WaJwJjxViJrhE.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <script>
+      const audio = document.getElementById("myAudio");
+      const volumeControl = document.getElementById("volumeControl");
+      const debugElement = document.getElementById("debug");
+      const progressBar = document.getElementById("progressBar");
+      const progressTime = document.getElementById("progressTime");
+      const seekSlider = document.getElementById("seekSlider");
+      const progressContainer = document.getElementById("progressContainer");
+
+      function playAudio() {
+        audio.play().then(() => {
+          debugElement.textContent = "Audio playing successfully";
+          updateProgress();
+        }).catch(e => {
+          console.error("Error playing audio:", e);
+          debugElement.textContent = "Error playing audio: " + e.message;
+        });
+      }
+
+      function pauseAudio() {
+        audio.pause();
+        debugElement.textContent = "Audio paused";
+      }
+
+      function stopAudio() {
+        audio.pause();
+        audio.currentTime = 0;
+        updateProgress();
+        debugElement.textContent = "Audio stopped";
+      }
+
+      function adjustVolume() {
+        audio.volume = volumeControl.value;
+        debugElement.textContent = "Volume adjusted to " + (volumeControl.value * 100) + "%";
+      }
+
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return ${minutes}:${remainingSeconds.toString().padStart(2, '0')};
+      }
+
+      function updateProgress() {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = ${progress}%;
+        progressTime.textContent = ${formatTime(audio.currentTime)} / ${formatTime(audio.duration)};
+        seekSlider.value = progress;
+
+        if (!audio.paused) {
+          requestAnimationFrame(updateProgress);
+        }
+      }
+
+      function seek() {
+        const seekTime = (seekSlider.value / 100) * audio.duration;
+        audio.currentTime = seekTime;
+        updateProgress();
+      }
+
+      // Initialize volume
+      adjustVolume();
+
+      // Check if audio file is loaded
+      audio.addEventListener('loadeddata', () => {
+        debugElement.textContent = "Audio file loaded successfully";
+        updateProgress();
+      });
+
+      audio.addEventListener('error', (e) => {
+        console.error("Error loading audio file:", e);
+        debugElement.textContent = "Error loading audio file: " + e.message;
+      });
+
+      // Update progress when seeking
+      audio.addEventListener('seeked', updateProgress);
+
+      // Seek functionality
+      seekSlider.addEventListener('input', seek);
+
+      // Click on progress bar to seek
+      progressContainer.addEventListener('click', function(e) {
+        const clickPosition = (e.offsetX / this.offsetWidth) * audio.duration;
+        audio.currentTime = clickPosition;
+        updateProgress();
+      });
+      
+      function showMP4Video() {
+        const youtubeContainer = document.getElementById('youtubeContainer');
+        const mp4Container = document.getElementById('mp4Container');
+        const mp4Video = document.getElementById('mp4Video');
+
+        mp4Container.style.display = 'block';
+        youtubeContainer.style.display = 'none';
+        mp4Video.play().catch(e => {
+          console.error("Error playing MP4 video:", e);
+          // Handle the error (e.g., show an error message to the user)
+        });
+      }
+
+      function showYouTubeVideo1() {
+        const youtubeContainer1 = document.getElementById('youtubeContainer1');
+        const youtubeVideo1 = document.getElementById('youtubeVideo1');
+        const youtubeContainer2 = document.getElementById('youtubeContainer2');
+      
+        youtubeVideo1.src = 'https://www.youtube.com/embed/bCFgJGePm0U?autoplay=1';
+        youtubeContainer1.style.display = 'block';
+        youtubeContainer2.style.display = 'none';
+      }
+
+      function showYouTubeVideo2() {
+        const youtubeContainer1 = document.getElementById('youtubeContainer1');
+        const youtubeContainer2 = document.getElementById('youtubeContainer2');
+        const youtubeVideo2 = document.getElementById('youtubeVideo2');
+      
+        // Replace 'dQw4w9WgXcQ' with the actual YouTube video ID you want to play
+        youtubeVideo2.src = 'https://www.youtube.com/embed/bCFgJGePm0U?autoplay=1';
+        youtubeContainer2.style.display = 'block';
+        youtubeContainer1.style.display = 'none';
+      }
+    </script>
+  </body>
+</html>
